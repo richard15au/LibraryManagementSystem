@@ -5,6 +5,7 @@
 }
 
 <div class="text-center mb-5">
+
     <h1 class="display-4">
         Welcome to the Library
     </h1>
@@ -19,14 +20,150 @@
        class="btn btn-primary btn-lg">
         Browse Books
     </a>
+
 </div>
 
 
+<!-- ========================================================= -->
+<!-- LIBRARY INFORMATION -->
+<!-- ========================================================= -->
+@if (ViewBag.Library != null)
+{
+    <section class="mb-5">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body p-4">
+
+                <div class="text-center mb-4">
+
+                    <h2>
+                        📚 Library Information
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Library details and operating information
+                    </p>
+
+                </div>
+
+
+                <div class="row g-4">
+
+                    <!-- LIBRARY NAME -->
+
+                    <div class="col-md-6">
+
+                        <div class="p-3 border rounded h-100">
+
+                            <h5>
+                                📖 Library Name
+                            </h5>
+
+                            <p class="mb-0">
+                                <strong>
+                                    @ViewBag.Library.Name
+                                </strong>
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- LOCATION -->
+
+                    <div class="col-md-6">
+
+                        <div class="p-3 border rounded h-100">
+
+                            <h5>
+                                📍 Location
+                            </h5>
+
+                            <p class="mb-0">
+                                @ViewBag.Library.Location
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- OPERATING HOURS -->
+
+                    <div class="col-md-6">
+
+                        <div class="p-3 border rounded h-100">
+
+                            <h5>
+                                🕒 Operating Hours
+                            </h5>
+
+                            <p class="mb-0">
+                                @ViewBag.Library.OperatingHours
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CONTACT DETAILS -->
+
+                    <div class="col-md-6">
+
+                        <div class="p-3 border rounded h-100">
+
+                            <h5>
+                                📞 Contact Details
+                            </h5>
+
+                            <p class="mb-0">
+                                @ViewBag.Library.ContactDetails
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+}
+else
+{
+    <section class="mb-5">
+
+        <div class="alert alert-info">
+
+            <h5>
+                📚 Library Information
+            </h5>
+
+            <p class="mb-0">
+                Library information has not been configured yet.
+            </p>
+
+        </div>
+
+    </section>
+}
+
+
+<!-- ========================================================= -->
 <!-- NEW ARRIVALS -->
+<!-- ========================================================= -->
 
 <section class="mb-5">
 
-    <h2 class="mb-4">New Arrivals</h2>
+    <h2 class="mb-4">
+        New Arrivals
+    </h2>
 
     <div class="row">
 
@@ -84,11 +221,15 @@
 </section>
 
 
+<!-- ========================================================= -->
 <!-- MOST BORROWED -->
+<!-- ========================================================= -->
 
 <section class="mb-5">
 
-    <h2 class="mb-4">Most Borrowed Books</h2>
+    <h2 class="mb-4">
+        Most Borrowed Books
+    </h2>
 
     <div class="row">
 
@@ -146,11 +287,15 @@
 </section>
 
 
+<!-- ========================================================= -->
 <!-- RECOMMENDATIONS -->
+<!-- ========================================================= -->
 
 <section class="mb-5">
 
-    <h2 class="mb-4">Recommended for You</h2>
+    <h2 class="mb-4">
+        Recommended for You
+    </h2>
 
     <div class="row">
 
@@ -208,23 +353,29 @@
 </section>
 
 
+<!-- ========================================================= -->
 <!-- CURRENTLY AVAILABLE -->
+<!-- ========================================================= -->
 
 <section class="mb-5">
 
-    <h2 class="mb-4">Currently Available Books</h2>
+    <h2 class="mb-4">
+        Currently Available Books
+    </h2>
 
     <div class="table-responsive">
 
         <table class="table table-hover align-middle">
 
             <thead>
+
                 <tr>
                     <th>Book</th>
                     <th>Genre</th>
                     <th>Availability</th>
                     <th></th>
                 </tr>
+
             </thead>
 
             <tbody>
@@ -250,12 +401,14 @@
                         </td>
 
                         <td>
+
                             <a asp-controller="Books"
                                asp-action="Details"
                                asp-route-id="@book.BookId"
                                class="btn btn-sm btn-primary">
                                 View
                             </a>
+
                         </td>
 
                     </tr>
@@ -270,7 +423,9 @@
 </section>
 
 
+<!-- ========================================================= -->
 <!-- GROUP DETAILS -->
+<!-- ========================================================= -->
 
 <section class="mb-5">
 

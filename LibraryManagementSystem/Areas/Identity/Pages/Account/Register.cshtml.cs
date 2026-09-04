@@ -129,6 +129,8 @@ public class RegisterModel : PageModel
 
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "Member");
+
                 _logger.LogInformation("User created a new account with password.");
 
                 var userId = await _userManager.GetUserIdAsync(user);

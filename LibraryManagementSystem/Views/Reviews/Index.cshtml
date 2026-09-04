@@ -6,10 +6,7 @@
 
 <div class="container mt-4">
 
-    <!-- ========================================================= -->
     <!-- HEADER -->
-    <!-- ========================================================= -->
-
     <div class="mb-4">
 
         <h1>Review Management</h1>
@@ -30,9 +27,7 @@
     </div>
 
 
-    <!-- ========================================================= -->
     <!-- SUCCESS MESSAGE -->
-    <!-- ========================================================= -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show"
@@ -50,9 +45,7 @@
     }
 
 
-    <!-- ========================================================= -->
     <!-- ERROR MESSAGE -->
-    <!-- ========================================================= -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -70,9 +63,7 @@
     }
 
 
-    <!-- ========================================================= -->
     <!-- NO REVIEWS -->
-    <!-- ========================================================= -->
     @if (Model == null || !Model.Any())
     {
         <div class="alert alert-info">
@@ -98,10 +89,7 @@
     }
     else
     {
-        <!-- ===================================================== -->
         <!-- REVIEWS TABLE -->
-        <!-- ===================================================== -->
-
         <div class="card shadow-sm">
 
             <div class="card-body">
@@ -157,11 +145,9 @@
                                 <tr>
 
                                     <!-- BOOK -->
-
                                     <td>
                                         <strong>
-                                            @(review.Book?.Title
-                                                ?? "Unknown Book")
+                                            @(review.Book?.Title ?? "Unknown Book")
                                         </strong>
                                     </td>
 
@@ -198,7 +184,6 @@
 
 
                                     <!-- RATING -->
-
                                     <td>
 
                                         <div class="text-warning">
@@ -227,11 +212,9 @@
 
 
                                     <!-- COMMENT -->
-
                                     <td>
 
-                                        @if (string.IsNullOrWhiteSpace(
-                                            review.Comment))
+                                        @if (string.IsNullOrWhiteSpace(review.Comment))
                                         {
                                             <span class="text-muted">
                                                 No comment provided
@@ -246,14 +229,13 @@
 
 
                                     <!-- REVIEW DATE -->
-
                                     <td>
-                                        @(review.ReviewDate.ToLocalTime().ToString("dd/MM/yyyy"))
+                                        @(review.ReviewDate.ToLocalTime()
+                                            .ToString("dd/MM/yyyy"))
                                     </td>
 
 
                                     <!-- APPROVAL -->
-
                                     <td>
 
                                         @if (review.IsApproved)
@@ -273,13 +255,50 @@
 
 
                                     <!-- ACTIONS -->
-
                                     <td>
 
-                                        @if (User.IsInRole("Librarian") ||
-                                             review.UserId == User.FindFirst(
-                                                 System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                                        @if (User.IsInRole("Librarian"))
                                         {
+                                            <!-- APPROVE PENDING REVIEW -->
+                                            @if (!review.IsApproved)
+                                            {
+                                                <form asp-action="Approve"
+                                                      asp-route-id="@review.ReviewId"
+                                                      method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Are you sure you want to approve this review?');">
+
+                                                    @Html.AntiForgeryToken()
+
+                                                    <button type="submit"
+                                                            class="btn btn-success btn-sm">
+                                                        Approve
+                                                    </button>
+
+                                                </form>
+                                            }
+
+
+                                            <!-- DELETE REVIEW -->
+                                            <form asp-action="Delete"
+                                                  asp-route-id="@review.ReviewId"
+                                                  method="post"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Are you sure you want to delete this review?');">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-sm">
+                                                    Delete
+                                                </button>
+
+                                            </form>
+                                        }
+                                        else if (review.UserId == User.FindFirst(
+                                            System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                                        {
+                                            <!-- MEMBER CAN DELETE OWN REVIEW -->
                                             <form asp-action="Delete"
                                                   asp-route-id="@review.ReviewId"
                                                   method="post"

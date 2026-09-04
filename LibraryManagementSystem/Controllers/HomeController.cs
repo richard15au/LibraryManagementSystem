@@ -23,6 +23,17 @@ namespace LibraryManagementSystem.Controllers
         public async Task<IActionResult> Index()
         {
             // -----------------------------------------------------
+            // Library Information
+            // -----------------------------------------------------
+
+            var library = await _context.Libraries
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            ViewBag.Library = library;
+
+
+            // -----------------------------------------------------
             // New Arrivals
             // -----------------------------------------------------
 
@@ -69,9 +80,6 @@ namespace LibraryManagementSystem.Controllers
 
             // -----------------------------------------------------
             // Recommendations
-            //
-            // Currently based on available books with
-            // borrowing activity.
             // -----------------------------------------------------
 
             var recommendations = await _context.Books

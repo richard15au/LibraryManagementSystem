@@ -170,7 +170,7 @@ namespace LibraryManagementSystem.Controllers
                 Rating = rating,
                 Comment = comment,
                 ReviewDate = DateTime.UtcNow,
-                IsApproved = true
+                IsApproved = false
             };
 
 
@@ -233,5 +233,33 @@ namespace LibraryManagementSystem.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Librarian")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var review = await _context.Reviews
+                .FirstOrDefaultAsync(r => r.ReviewId == id);
+
+            if (review == null)
+                return NotFound();
+
+            if (review.IsApproved)
+            {
+                TempData["ErrorMessage"] = "This review has already been approved.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            review.IsApproved = true;
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Review approved successfully.";
+
+            return RedirectToAction(nameof(Index));
+        }
     }
+
 }

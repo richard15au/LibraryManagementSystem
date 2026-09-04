@@ -16,17 +16,24 @@ namespace LibraryManagementSystem.Controllers
             _context = context;
         }
 
+        // =========================================================
         // GET: /Libraries
+        // =========================================================
+
         public async Task<IActionResult> Index()
         {
-            var libraries = await _context.Libraries
+            var library = await _context.Libraries
                 .AsNoTracking()
-                .ToListAsync();
+                .FirstOrDefaultAsync();
 
-            return View(libraries);
+            return View(library);
         }
 
+
+        // =========================================================
         // GET: /Libraries/Details/5
+        // =========================================================
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,7 +43,8 @@ namespace LibraryManagementSystem.Controllers
 
             var library = await _context.Libraries
                 .AsNoTracking()
-                .FirstOrDefaultAsync(l => l.LibraryId == id);
+                .FirstOrDefaultAsync(
+                    l => l.LibraryId == id);
 
             if (library == null)
             {
@@ -46,31 +54,11 @@ namespace LibraryManagementSystem.Controllers
             return View(library);
         }
 
-        // GET: /Libraries/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
 
-        // POST: /Libraries/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            [Bind("Name,Location,OperatingHours,ContactDetails")]
-            Library library)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(library);
-            }
-
-            _context.Libraries.Add(library);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
+        // =========================================================
         // GET: /Libraries/Edit/5
+        // =========================================================
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -78,7 +66,9 @@ namespace LibraryManagementSystem.Controllers
                 return NotFound();
             }
 
-            var library = await _context.Libraries.FindAsync(id);
+            var library = await _context.Libraries
+                .FirstOrDefaultAsync(
+                    l => l.LibraryId == id);
 
             if (library == null)
             {
@@ -88,7 +78,11 @@ namespace LibraryManagementSystem.Controllers
             return View(library);
         }
 
+
+        // =========================================================
         // POST: /Libraries/Edit/5
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -109,6 +103,7 @@ namespace LibraryManagementSystem.Controllers
             try
             {
                 _context.Libraries.Update(library);
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -121,46 +116,16 @@ namespace LibraryManagementSystem.Controllers
                 throw;
             }
 
-            return RedirectToAction(nameof(Index));
-        }
-
-        // GET: /Libraries/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var library = await _context.Libraries
-                .AsNoTracking()
-                .FirstOrDefaultAsync(l => l.LibraryId == id);
-
-            if (library == null)
-            {
-                return NotFound();
-            }
-
-            return View(library);
-        }
-
-        // POST: /Libraries/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var library = await _context.Libraries.FindAsync(id);
-
-            if (library == null)
-            {
-                return NotFound();
-            }
-
-            _context.Libraries.Remove(library);
-            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] =
+                "Library profile updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        // =========================================================
+        // CHECK LIBRARY EXISTS
+        // =========================================================
 
         private bool LibraryExists(int id)
         {
