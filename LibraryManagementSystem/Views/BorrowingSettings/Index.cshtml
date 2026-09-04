@@ -1,0 +1,80 @@
+@model IEnumerable<LibraryManagementSystem.Models.BorrowingSettings>
+
+@{
+    ViewData["Title"] = "Borrowing Settings";
+}
+
+<h1>Borrowing Settings</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Create New
+    </a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Library
+            </th>
+            <th>
+                Loan Duration
+            </th>
+            <th>
+                Renewal Limit
+            </th>
+            <th>
+                Overdue Penalty
+            </th>
+            <th>
+                Maximum Borrowable Items
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.Library?.Name
+                </td>
+
+                <td>
+                    @item.LoanDurationDays days
+                </td>
+
+                <td>
+                    @item.RenewalLimit
+                </td>
+
+                <td>
+                    @item.OverduePenalty.ToString("C")
+                </td>
+
+                <td>
+                    @item.MaximumBorrowableItems
+                </td>
+
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@item.BorrowingSettingsId">
+                        Edit
+                    </a>
+                    |
+                    <a asp-action="Details"
+                       asp-route-id="@item.BorrowingSettingsId">
+                        Details
+                    </a>
+                    |
+                    <a asp-action="Delete"
+                       asp-route-id="@item.BorrowingSettingsId">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

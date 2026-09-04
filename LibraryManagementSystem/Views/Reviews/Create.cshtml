@@ -1,0 +1,88 @@
+﻿@model LibraryManagementSystem.Models.Book
+
+@{
+    ViewData["Title"] = "Write Review";
+}
+
+<h1>Write Review</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <h4>@Model.Title</h4>
+
+        <p>
+            <strong>ISBN:</strong>
+            @Model.ISBN
+        </p>
+
+        <form asp-action="Create" method="post">
+
+            <input type="hidden"
+                   name="bookId"
+                   value="@Model.BookId" />
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger">
+            </div>
+
+            <div class="form-group mb-3">
+
+                <label for="rating"
+                       class="control-label">
+                    Rating
+                </label>
+
+                <select name="rating"
+                        id="rating"
+                        class="form-control">
+
+                    <option value="">
+                        -- Select Rating --
+                    </option>
+
+                    <option value="1">1 - Very Poor</option>
+                    <option value="2">2 - Poor</option>
+                    <option value="3">3 - Average</option>
+                    <option value="4">4 - Good</option>
+                    <option value="5">5 - Excellent</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group mb-3">
+
+                <label for="comment"
+                       class="control-label">
+                    Comment
+                </label>
+
+                <textarea name="comment"
+                          id="comment"
+                          class="form-control"
+                          rows="5"
+                          maxlength="2000"></textarea>
+
+                <small class="form-text text-muted">
+                    Maximum 2000 characters.
+                </small>
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Submit Review
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Back to Reviews
+            </a>
+
+        </form>
+
+    </div>
+</div>

@@ -1,0 +1,134 @@
+@model IEnumerable<LibraryManagementSystem.Models.Book>
+
+@{
+    ViewData["Title"] = "Books";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Books</h1>
+
+    @if (User.IsInRole("Librarian"))
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            Create New Book
+        </a>
+    }
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Cover</th>
+            <th>Title</th>
+            <th>ISBN</th>
+            <th>Genre</th>
+            <th>Authors</th>
+            <th>Availability</th>
+            <th>Published</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var book in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(book.CoverImage))
+                    {
+                        <img src="@book.CoverImage"
+                             alt="@book.Title cover"
+                             style="width: 80px;
+                        height: 110px;
+                        object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+                            No cover
+                        </span>
+                    }
+                </td>
+                <td>
+                    <strong>@book.Title</strong>
+                </td>
+
+                <td>
+                    @book.ISBN
+                </td>
+
+                <td>
+                    @(book.Genre?.Name ?? "Unknown")
+                </td>
+
+                <td>
+                    @if (book.BookAuthors.Any())
+                    {
+                        foreach (var bookAuthor in book.BookAuthors)
+                        {
+                            <div>
+                                @bookAuthor.Author?.FirstName
+                                @bookAuthor.Author?.LastName
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+                            No author assigned
+                        </span>
+                    }
+                </td>
+
+                <td>
+                    @if (book.AvailabilityStatus == "Available")
+                    {
+                        <span class="badge bg-success">
+                            Available
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">
+                            @book.AvailabilityStatus
+                        </span>
+                    }
+                </td>
+
+                <td>
+                    @(book.PublishedDate?.ToString("yyyy") ?? "-")
+                </td>
+
+                <td>
+                    <a asp-action="Details"
+                       asp-route-id="@book.BookId"
+                       class="btn btn-sm btn-outline-primary">
+                        Details
+                    </a>
+
+                    @if (User.IsInRole("Librarian"))
+                    {
+                        <a asp-action="Edit"
+                           asp-route-id="@book.BookId"
+                           class="btn btn-sm btn-outline-secondary">
+                            Edit
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@book.BookId"
+                           class="btn btn-sm btn-outline-danger">
+                            Delete
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

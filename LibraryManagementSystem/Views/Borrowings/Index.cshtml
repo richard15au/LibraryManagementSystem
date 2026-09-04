@@ -1,0 +1,111 @@
+﻿@model IEnumerable<LibraryManagementSystem.Models.Borrowing>
+
+@{
+    ViewData["Title"] = "Borrowings";
+}
+
+<h1>Borrowings</h1>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Book</th>
+            <th>Member</th>
+            <th>Borrow Date</th>
+            <th>Due Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
+            <th>Renewals</th>
+            <th>Fine</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var borrowing in Model)
+        {
+            <tr>
+                <td>
+                    @borrowing.Book?.Title
+                </td>
+
+                <td>
+                    @borrowing.User?.FirstName
+                    @borrowing.User?.LastName
+                </td>
+
+                <td>
+                    @borrowing.BorrowDate.ToString("dd/MM/yyyy")
+                </td>
+
+                <td>
+                    @borrowing.DueDate.ToString("dd/MM/yyyy")
+                </td>
+
+                <td>
+                    @(borrowing.ReturnDate.HasValue
+                        ? borrowing.ReturnDate.Value.ToString("dd/MM/yyyy")
+                        : "-")
+                </td>
+
+                <td>
+                    @borrowing.Status
+                </td>
+
+                <td>
+                    @borrowing.RenewalCount
+                </td>
+
+                <td>
+                    @(borrowing.Fine != null
+                        ? borrowing.Fine.Amount.ToString("C")
+                        : "-")
+                </td>
+
+                <td>
+                    @if (borrowing.Status == "Borrowed" &&
+                         borrowing.ReturnDate == null)
+                    {
+                        <a asp-action="Return"
+                           asp-route-id="@borrowing.BorrowingId"
+                           class="btn btn-primary btn-sm">
+                            Return
+                        </a>
+
+                        <form asp-action="Renew"
+                              asp-route-id="@borrowing.BorrowingId"
+                              method="post"
+                              style="display:inline">
+
+                            <button type="submit"
+                                    class="btn btn-success btn-sm">
+                                Renew
+                            </button>
+
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+                            No actions
+                        </span>
+                    }
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>

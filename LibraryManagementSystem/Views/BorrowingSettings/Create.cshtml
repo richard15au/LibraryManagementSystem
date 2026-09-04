@@ -1,0 +1,138 @@
+@model LibraryManagementSystem.Models.BorrowingSettings
+
+@{
+    ViewData["Title"] = "Create Borrowing Settings";
+}
+
+<h1>Create Borrowing Settings</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <form asp-action="Create">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger">
+            </div>
+
+            <!-- Library -->
+            <div class="form-group mb-3">
+                <label asp-for="LibraryId" class="control-label">
+                    Library
+                </label>
+
+                <select asp-for="LibraryId"
+                        class="form-control"
+                        asp-items="ViewBag.LibraryId">
+
+                    <option value="">
+                        -- Select Library --
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="LibraryId"
+                      class="text-danger">
+                </span>
+            </div>
+
+
+            <!-- Loan Duration -->
+            <div class="form-group mb-3">
+                <label asp-for="LoanDurationDays"
+                       class="control-label">
+                    Loan Duration (Days)
+                </label>
+
+                <input asp-for="LoanDurationDays"
+                       class="form-control"
+                       type="number"
+                       min="1"
+                       max="365" />
+
+                <span asp-validation-for="LoanDurationDays"
+                      class="text-danger">
+                </span>
+            </div>
+
+
+            <!-- Renewal Limit -->
+            <div class="form-group mb-3">
+                <label asp-for="RenewalLimit"
+                       class="control-label">
+                    Renewal Limit
+                </label>
+
+                <input asp-for="RenewalLimit"
+                       class="form-control"
+                       type="number"
+                       min="0"
+                       max="100" />
+
+                <span asp-validation-for="RenewalLimit"
+                      class="text-danger">
+                </span>
+            </div>
+
+
+            <!-- Overdue Penalty -->
+            <div class="form-group mb-3">
+                <label asp-for="OverduePenalty"
+                       class="control-label">
+                    Overdue Penalty (per day)
+                </label>
+
+                <input asp-for="OverduePenalty"
+                       class="form-control"
+                       type="number"
+                       min="0"
+                       step="0.01" />
+
+                <span asp-validation-for="OverduePenalty"
+                      class="text-danger">
+                </span>
+            </div>
+
+
+            <!-- Maximum Borrowable Items -->
+            <div class="form-group mb-3">
+                <label asp-for="MaximumBorrowableItems"
+                       class="control-label">
+                    Maximum Borrowable Items
+                </label>
+
+                <input asp-for="MaximumBorrowableItems"
+                       class="form-control"
+                       type="number"
+                       min="1"
+                       max="100" />
+
+                <span asp-validation-for="MaximumBorrowableItems"
+                      class="text-danger">
+                </span>
+            </div>
+
+
+            <div class="form-group">
+                <input type="submit"
+                       value="Create"
+                       class="btn btn-primary" />
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+                    Back to List
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,82 @@
+﻿@model LibraryManagementSystem.Models.Borrowing
+
+@{
+    ViewData["Title"] = "Return Book";
+}
+
+<h1>Return Book</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+
+        <h4>Borrowing Details</h4>
+
+        <dl class="row">
+
+            <dt class="col-sm-5">
+                Book
+            </dt>
+
+            <dd class="col-sm-7">
+                @Model.Book?.Title
+            </dd>
+
+            <dt class="col-sm-5">
+                Member
+            </dt>
+
+            <dd class="col-sm-7">
+                @Model.User?.FirstName
+                @Model.User?.LastName
+            </dd>
+
+            <dt class="col-sm-5">
+                Borrow Date
+            </dt>
+
+            <dd class="col-sm-7">
+                @Model.BorrowDate.ToString("dd/MM/yyyy")
+            </dd>
+
+            <dt class="col-sm-5">
+                Due Date
+            </dt>
+
+            <dd class="col-sm-7">
+                @Model.DueDate.ToString("dd/MM/yyyy")
+            </dd>
+
+            <dt class="col-sm-5">
+                Status
+            </dt>
+
+            <dd class="col-sm-7">
+                @Model.Status
+            </dd>
+
+        </dl>
+
+        <div class="alert alert-warning">
+            Are you sure you want to return this book?
+        </div>
+
+        <form asp-action="Return"
+              asp-route-id="@Model.BorrowingId"
+              method="post">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Confirm Return
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+</div>

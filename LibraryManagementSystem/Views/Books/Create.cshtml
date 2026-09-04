@@ -1,0 +1,213 @@
+@model LibraryManagementSystem.Models.BookFormViewModel
+
+@{
+    ViewData["Title"] = "Create Book";
+}
+
+<h1>Create Book</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+
+        <form asp-action="Create"
+              method="post"
+              enctype="multipart/form-data">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Title"
+                       class="control-label"></label>
+
+                <input asp-for="Title"
+                       class="form-control" />
+
+                <span asp-validation-for="Title"
+                      class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group mb-3">
+                <label asp-for="ISBN"
+                       class="control-label"></label>
+
+                <input asp-for="ISBN"
+                       class="form-control" />
+
+                <span asp-validation-for="ISBN"
+                      class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group mb-3">
+                <label asp-for="Summary"
+                       class="control-label"></label>
+
+                <textarea asp-for="Summary"
+                          class="form-control"
+                          rows="4"></textarea>
+
+                <span asp-validation-for="Summary"
+                      class="text-danger"></span>
+            </div>
+
+
+            <!-- Book Cover Upload -->
+
+            <div class="form-group mb-3">
+
+                <label for="coverImageFile"
+                       class="control-label">
+                    Book Cover Image
+                </label>
+
+                <input type="file"
+                       name="coverImageFile"
+                       id="coverImageFile"
+                       class="form-control"
+                       accept=".jpg,.jpeg,.png,.gif,.webp" />
+
+                <small class="form-text text-muted">
+                    JPG, JPEG, PNG, GIF or WEBP.
+                    Maximum 5 MB.
+                </small>
+
+                <span asp-validation-for="CoverImage"
+                      class="text-danger"></span>
+
+            </div>
+
+
+            <div class="form-group mb-3">
+
+                <label asp-for="PublishedDate"
+                       class="control-label">
+                    Published Date
+                </label>
+
+                <input asp-for="PublishedDate"
+                       type="date"
+                       class="form-control" />
+
+                <span asp-validation-for="PublishedDate"
+                      class="text-danger"></span>
+
+            </div>
+
+
+            <div class="form-group mb-3">
+
+                <label asp-for="AvailabilityStatus"
+                       class="control-label">
+                    Availability
+                </label>
+
+                <select asp-for="AvailabilityStatus"
+                        class="form-control">
+
+                    <option value="Available">
+                        Available
+                    </option>
+
+                    <option value="Unavailable">
+                        Unavailable
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="AvailabilityStatus"
+                      class="text-danger"></span>
+
+            </div>
+
+
+            <div class="form-group mb-3">
+
+                <label asp-for="GenreId"
+                       class="control-label">
+                    Genre
+                </label>
+
+                <select asp-for="GenreId"
+                        class="form-control">
+
+                    <option value="">
+                        -- Select Genre --
+                    </option>
+
+                    @foreach (var genre in Model.Genres)
+                    {
+                        <option value="@genre.GenreId">
+                            @genre.Name
+                        </option>
+                    }
+
+                </select>
+
+                <span asp-validation-for="GenreId"
+                      class="text-danger"></span>
+
+            </div>
+
+
+            <div class="form-group mb-3">
+
+                <label asp-for="SelectedAuthorIds"
+                       class="control-label">
+                    Authors
+                </label>
+
+                <select asp-for="SelectedAuthorIds"
+                        class="form-control"
+                        multiple
+                        size="6">
+
+                    @foreach (var author in Model.Authors)
+                    {
+                        <option value="@author.AuthorId">
+                            @author.FirstName
+                            @author.LastName
+                        </option>
+                    }
+
+                </select>
+
+                <small class="form-text text-muted">
+                    Hold Ctrl (Windows) or Command (Mac)
+                    to select multiple authors.
+                </small>
+
+                <span asp-validation-for="SelectedAuthorIds"
+                      class="text-danger"></span>
+
+            </div>
+
+
+            <div class="form-group mt-4">
+
+                <input type="submit"
+                       value="Create"
+                       class="btn btn-primary" />
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+                    Back to List
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync(
+            "_ValidationScriptsPartial");
+    }
+}

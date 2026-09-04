@@ -1,0 +1,322 @@
+﻿@model LibraryManagementSystem.Models.HomeViewModel
+
+@{
+    ViewData["Title"] = "Library Management System";
+}
+
+<div class="text-center mb-5">
+    <h1 class="display-4">
+        Welcome to the Library
+    </h1>
+
+    <p class="lead">
+        Discover books, manage your borrowing,
+        make reservations and share your reviews.
+    </p>
+
+    <a asp-controller="Books"
+       asp-action="Index"
+       class="btn btn-primary btn-lg">
+        Browse Books
+    </a>
+</div>
+
+
+<!-- NEW ARRIVALS -->
+
+<section class="mb-5">
+
+    <h2 class="mb-4">New Arrivals</h2>
+
+    <div class="row">
+
+        @foreach (var book in Model.NewArrivals)
+        {
+            <div class="col-md-4 col-lg-3 mb-4">
+
+                <div class="card h-100 shadow-sm">
+
+                    @if (!string.IsNullOrEmpty(book.CoverImage))
+                    {
+                        <img src="@book.CoverImage"
+                             class="card-img-top"
+                             alt="@book.Title"
+                             style="height:260px; object-fit:contain;" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-light"
+                             style="height:260px;">
+
+                            <span class="text-muted">
+                                No Cover
+                            </span>
+
+                        </div>
+                    }
+
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+                            @book.Title
+                        </h5>
+
+                        <p class="card-text">
+                            @book.Summary
+                        </p>
+
+                        <a asp-controller="Books"
+                           asp-action="Details"
+                           asp-route-id="@book.BookId"
+                           class="btn btn-outline-primary">
+                            View Details
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</section>
+
+
+<!-- MOST BORROWED -->
+
+<section class="mb-5">
+
+    <h2 class="mb-4">Most Borrowed Books</h2>
+
+    <div class="row">
+
+        @foreach (var book in Model.MostBorrowed)
+        {
+            <div class="col-md-4 col-lg-3 mb-4">
+
+                <div class="card h-100 shadow-sm">
+
+                    @if (!string.IsNullOrEmpty(book.CoverImage))
+                    {
+                        <img src="@book.CoverImage"
+                             class="card-img-top"
+                             alt="@book.Title"
+                             style="height:260px; object-fit:contain;" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-light"
+                             style="height:260px;">
+
+                            <span class="text-muted">
+                                No Cover
+                            </span>
+
+                        </div>
+                    }
+
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+                            @book.Title
+                        </h5>
+
+                        <p class="card-text">
+                            Popular with our readers.
+                        </p>
+
+                        <a asp-controller="Books"
+                           asp-action="Details"
+                           asp-route-id="@book.BookId"
+                           class="btn btn-outline-primary">
+                            View Details
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</section>
+
+
+<!-- RECOMMENDATIONS -->
+
+<section class="mb-5">
+
+    <h2 class="mb-4">Recommended for You</h2>
+
+    <div class="row">
+
+        @foreach (var book in Model.Recommendations)
+        {
+            <div class="col-md-4 col-lg-3 mb-4">
+
+                <div class="card h-100 shadow-sm">
+
+                    @if (!string.IsNullOrEmpty(book.CoverImage))
+                    {
+                        <img src="@book.CoverImage"
+                             class="card-img-top"
+                             alt="@book.Title"
+                             style="height:260px; object-fit:contain;" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-light"
+                             style="height:260px;">
+
+                            <span class="text-muted">
+                                No Cover
+                            </span>
+
+                        </div>
+                    }
+
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+                            @book.Title
+                        </h5>
+
+                        <p class="card-text">
+                            Available now and popular with library readers.
+                        </p>
+
+                        <a asp-controller="Books"
+                           asp-action="Details"
+                           asp-route-id="@book.BookId"
+                           class="btn btn-outline-primary">
+                            View Details
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</section>
+
+
+<!-- CURRENTLY AVAILABLE -->
+
+<section class="mb-5">
+
+    <h2 class="mb-4">Currently Available Books</h2>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle">
+
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Genre</th>
+                    <th>Availability</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var book in Model.AvailableBooks)
+                {
+                    <tr>
+
+                        <td>
+                            <strong>
+                                @book.Title
+                            </strong>
+                        </td>
+
+                        <td>
+                            @book.Genre?.Name
+                        </td>
+
+                        <td>
+                            <span class="badge bg-success">
+                                Available
+                            </span>
+                        </td>
+
+                        <td>
+                            <a asp-controller="Books"
+                               asp-action="Details"
+                               asp-route-id="@book.BookId"
+                               class="btn btn-sm btn-primary">
+                                View
+                            </a>
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- GROUP DETAILS -->
+
+<section class="mb-5">
+
+    <h2 class="mb-4">
+        Group 5 - Group Details
+    </h2>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered">
+
+            <thead class="table-light">
+
+                <tr>
+                    <th>Student ID</th>
+                    <th>Full Name</th>
+                    <th>Group</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var member in Model.GroupMembers)
+                {
+                    <tr>
+
+                        <td>
+                            @member.StudentId
+                        </td>
+
+                        <td>
+                            @member.FullName
+                        </td>
+
+                        <td>
+                            5
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>

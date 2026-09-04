@@ -1,0 +1,59 @@
+@model LibraryManagementSystem.Models.BorrowingSettings
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>BorrowingSettings</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="BorrowingSettingsId" />
+            <div class="form-group">
+                <label asp-for="LibraryId" class="control-label"></label>
+                <input asp-for="LibraryId" class="form-control" />
+                <span asp-validation-for="LibraryId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LoanDurationDays" class="control-label"></label>
+                <input asp-for="LoanDurationDays" class="form-control" />
+                <span asp-validation-for="LoanDurationDays" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RenewalLimit" class="control-label"></label>
+                <input asp-for="RenewalLimit" class="form-control" />
+                <span asp-validation-for="RenewalLimit" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="OverduePenalty" class="control-label"></label>
+                <input asp-for="OverduePenalty" class="form-control" />
+                <span asp-validation-for="OverduePenalty" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MaximumBorrowableItems" class="control-label"></label>
+                <input asp-for="MaximumBorrowableItems" class="form-control" />
+                <span asp-validation-for="MaximumBorrowableItems" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Library" class="control-label"></label>
+                <input asp-for="Library" class="form-control" />
+                <span asp-validation-for="Library" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,59 @@
+@model IEnumerable<LibraryManagementSystem.Models.Library>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OperatingHours)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ContactDetails)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BorrowingSettings)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Location)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.OperatingHours)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.ContactDetails)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.BorrowingSettings)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.LibraryId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.LibraryId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.LibraryId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

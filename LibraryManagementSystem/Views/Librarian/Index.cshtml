@@ -1,0 +1,383 @@
+﻿@{
+    ViewData["Title"] = "Librarian Dashboard";
+}
+
+<div class="container mt-4">
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <div class="mb-4">
+        <h1>Librarian Dashboard</h1>
+
+        <p class="text-muted">
+            Manage the library, borrowing activities,
+            reservations, fines and member reviews.
+        </p>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- STATISTICS -->
+    <!-- ========================================================= -->
+
+    <div class="row">
+
+        <!-- Total Books -->
+
+        <div class="col-md-4 col-lg-2 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Total Books
+                    </h6>
+
+                    <h2 class="display-6">
+                        @ViewBag.TotalBooks
+                    </h2>
+
+                    <a asp-controller="Books"
+                       asp-action="Index"
+                       class="btn btn-sm btn-primary">
+                        Books
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Available Books -->
+
+        <div class="col-md-4 col-lg-2 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Available
+                    </h6>
+
+                    <h2 class="display-6">
+                        @ViewBag.AvailableBooks
+                    </h2>
+
+                    <a asp-controller="Books"
+                       asp-action="Index"
+                       class="btn btn-sm btn-success">
+                        View
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Active Borrowings -->
+
+        <div class="col-md-4 col-lg-2 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Borrowed
+                    </h6>
+
+                    <h2 class="display-6">
+                        @ViewBag.ActiveBorrowings
+                    </h2>
+
+                    <a asp-controller="Borrowings"
+                       asp-action="Index"
+                       class="btn btn-sm btn-primary">
+                        View
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Reservations -->
+
+        <div class="col-md-4 col-lg-2 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Reservations
+                    </h6>
+
+                    <h2 class="display-6">
+                        @ViewBag.ActiveReservations
+                    </h2>
+
+                    <a asp-controller="Reservations"
+                       asp-action="Index"
+                       class="btn btn-sm btn-warning">
+                        View
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Overdue -->
+
+        <div class="col-md-4 col-lg-2 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Overdue
+                    </h6>
+
+                    <h2 class="display-6">
+                        @ViewBag.OverdueBooks
+                    </h2>
+
+                    <a asp-controller="Borrowings"
+                       asp-action="Index"
+                       class="btn btn-sm btn-danger">
+                        View
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Outstanding Fines -->
+
+        <div class="col-md-4 col-lg-2 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Unpaid Fines
+                    </h6>
+
+                    <h2 class="display-6">
+                        @ViewBag.OutstandingFines.ToString("C")
+                    </h2>
+
+                    <a asp-controller="Borrowings"
+                       asp-action="Index"
+                       class="btn btn-sm btn-danger">
+                        View
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- RECENT BORROWINGS -->
+    <!-- ========================================================= -->
+
+    <div class="card shadow-sm mt-3">
+
+        <div class="card-header">
+
+            <h4 class="mb-0">
+                Recent Borrowing Transactions
+            </h4>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (ViewBag.RecentBorrowings != null &&
+                 ViewBag.RecentBorrowings.Count > 0)
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                            <tr>
+                                <th>Book</th>
+                                <th>Member</th>
+                                <th>Borrow Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var borrowing
+                                in ViewBag.RecentBorrowings)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @borrowing.Book?.Title
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @borrowing.User?.Email
+                                    </td>
+
+                                    <td>
+                                        @borrowing.BorrowDate.ToLocalTime().ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+                                        @borrowing.DueDate.ToLocalTime().ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+
+                                        @if (borrowing.Status == "Borrowed")
+                                        {
+                                            <span class="badge bg-primary">
+                                                Borrowed
+                                            </span>
+                                        }
+                                        else if (borrowing.Status == "Returned")
+                                        {
+                                            <span class="badge bg-success">
+                                                Returned
+                                            </span>
+                                        }
+                                        else if (borrowing.Status == "Overdue")
+                                        {
+                                            <span class="badge bg-danger">
+                                                Overdue
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @borrowing.Status
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    No borrowing transactions found.
+                </p>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- MANAGEMENT -->
+    <!-- ========================================================= -->
+
+    <div class="mt-5">
+
+        <h3 class="mb-3">
+            Library Management
+        </h3>
+
+        <div class="list-group">
+
+            <a asp-controller="Books"
+               asp-action="Index"
+               class="list-group-item list-group-item-action">
+                📚 Manage Books
+            </a>
+
+            <a asp-controller="Authors"
+               asp-action="Index"
+               class="list-group-item list-group-item-action">
+                ✍️ Manage Authors
+            </a>
+
+            <a asp-controller="Genres"
+               asp-action="Index"
+               class="list-group-item list-group-item-action">
+                🏷️ Manage Genres
+            </a>
+
+            <a asp-controller="Libraries"
+               asp-action="Index"
+               class="list-group-item list-group-item-action">
+                🏛️ Manage Library Profile
+            </a>
+
+            <a asp-controller="BorrowingSettings"
+               asp-action="Index"
+               class="list-group-item list-group-item-action">
+                ⚙️ Borrowing Settings
+            </a>
+
+            <a asp-controller="Borrowings"
+               asp-action="Index"
+               class="list-group-item list-group-item-action">
+                📖 Borrowing Transactions
+            </a>
+
+            <a asp-controller="Reservations"
+               asp-action="Index"
+               class="list-group-item list-group-item-action">
+                🔖 Reservation Management
+            </a>
+
+            <a class="list-group-item list-group-item-action"
+               asp-controller="Fines"
+               asp-action="Index">
+                💰 Fine Management
+            </a>
+
+            <a asp-controller="Reviews"
+               asp-action="Index"
+               class="list-group-item list-group-item-action">
+                ⭐ Review Management
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
