@@ -18,6 +18,7 @@ namespace LibraryManagementSystem.Controllers
 
         // =========================================================
         // GET: /Fines
+        // Display fines
         // =========================================================
 
         public async Task<IActionResult> Index()
@@ -29,10 +30,7 @@ namespace LibraryManagementSystem.Controllers
                     .ThenInclude(b => b!.User)
                 .AsNoTracking();
 
-            // -----------------------------------------------------
             // Members can only see their own fines.
-            // -----------------------------------------------------
-
             if (User.IsInRole("Member"))
             {
                 var userId = User.FindFirstValue(
@@ -41,10 +39,6 @@ namespace LibraryManagementSystem.Controllers
                 query = query.Where(f =>
                     f.Borrowing!.UserId == userId);
             }
-
-            // -----------------------------------------------------
-            // Librarians can see all fines.
-            // -----------------------------------------------------
 
             var fines = await query
                 .OrderByDescending(f => f.IssuedDate)
@@ -56,6 +50,7 @@ namespace LibraryManagementSystem.Controllers
 
         // =========================================================
         // POST: /Fines/MarkAsPaid/1
+        // Mark a fine as paid
         // =========================================================
 
         [HttpPost]
@@ -64,18 +59,14 @@ namespace LibraryManagementSystem.Controllers
         public async Task<IActionResult> MarkAsPaid(int id)
         {
             var fine = await _context.Fines
-                .FirstOrDefaultAsync(f =>
-                    f.FineId == id);
+                .FirstOrDefaultAsync(f => f.FineId == id);
 
             if (fine == null)
             {
                 return NotFound();
             }
 
-            // -----------------------------------------------------
-            // Check whether the fine is already paid.
-            // -----------------------------------------------------
-
+            // Prevent paying the same fine twice.
             if (fine.Status == "Paid")
             {
                 TempData["ErrorMessage"] =
@@ -84,11 +75,9 @@ namespace LibraryManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // -----------------------------------------------------
-            // Mark fine as paid.
-            // -----------------------------------------------------
-
+            // Update both status and payment date.
             fine.Status = "Paid";
+            fine.PaidDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 

@@ -1,33 +1,57 @@
 ﻿@model IEnumerable<LibraryManagementSystem.Models.Review>
 
 @{
-    ViewData["Title"] = "Review Management";
+    var isLibrarian = User.IsInRole("Librarian");
+
+    ViewData["Title"] = isLibrarian
+        ? "Review Management"
+        : "My Feedback & Ratings";
+
+    var currentUserId = User.FindFirst(
+        System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
 
-    <!-- HEADER -->
+    <!-- Page Header -->
     <div class="mb-4">
 
-        <h1>Review Management</h1>
-
-        @if (User.IsInRole("Librarian"))
+        @if (isLibrarian)
         {
+            <h1>📝 Review Management</h1>
+
             <p class="text-muted mb-0">
                 View and manage feedback and ratings submitted by members.
             </p>
         }
         else
         {
+            <h1>⭐ My Feedback & Ratings</h1>
+
             <p class="text-muted mb-0">
-                View and manage your book reviews.
+                View and manage your submitted book ratings and feedback.
             </p>
         }
 
     </div>
 
 
-    <!-- SUCCESS MESSAGE -->
+    <!-- Member Navigation -->
+    @if (!isLibrarian)
+    {
+        <div class="mb-4">
+
+            <a asp-controller="Books"
+               asp-action="Index"
+               class="btn btn-outline-primary">
+                📚 Browse Books
+            </a>
+
+        </div>
+    }
+
+
+    <!-- Success Message -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show"
@@ -45,7 +69,7 @@
     }
 
 
-    <!-- ERROR MESSAGE -->
+    <!-- Error Message -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -63,33 +87,117 @@
     }
 
 
-    <!-- NO REVIEWS -->
+    <!-- No Reviews -->
     @if (Model == null || !Model.Any())
     {
-        <div class="alert alert-info">
+        <div class="card shadow-sm">
 
-            <h5 class="alert-heading">
-                No reviews found
-            </h5>
+            <div class="card-body text-center p-5">
 
-            @if (User.IsInRole("Librarian"))
-            {
-                <p class="mb-0">
-                    There are currently no member reviews in the system.
-                </p>
-            }
-            else
-            {
-                <p class="mb-0">
-                    You have not submitted any reviews yet.
-                </p>
-            }
+                <div class="display-4 mb-3">
+                    📝
+                </div>
+
+                @if (isLibrarian)
+                {
+                    <h4>No Member Reviews Found</h4>
+
+                    <p class="text-muted mb-0">
+                        There are currently no member reviews in the system.
+                    </p>
+                }
+                else
+                {
+                    <h4>No Feedback Submitted Yet</h4>
+
+                    <p class="text-muted">
+                        You have not submitted any book reviews yet.
+                    </p>
+
+                    <a asp-controller="Books"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        📚 Browse Books
+                    </a>
+                }
+
+            </div>
 
         </div>
     }
     else
     {
-        <!-- REVIEWS TABLE -->
+        <!-- Review Summary -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-4">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+                        <h6 class="text-muted">
+                            @(isLibrarian
+                                ? "Total Reviews"
+                                : "My Reviews")
+                        </h6>
+
+                        <h3 class="mb-0">
+                            @Model.Count()
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+                        <h6 class="text-muted">
+                            Approved
+                        </h6>
+
+                        <h3 class="mb-0">
+                            @Model.Count(r => r.IsApproved)
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+                        <h6 class="text-muted">
+                            Pending
+                        </h6>
+
+                        <h3 class="mb-0">
+                            @Model.Count(r => !r.IsApproved)
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Reviews Table -->
         <div class="card shadow-sm">
 
             <div class="card-body">
@@ -106,7 +214,7 @@
                                     Book
                                 </th>
 
-                                @if (User.IsInRole("Librarian"))
+                                @if (isLibrarian)
                                 {
                                     <th>
                                         Member
@@ -118,7 +226,7 @@
                                 </th>
 
                                 <th>
-                                    Comment
+                                    Feedback
                                 </th>
 
                                 <th>
@@ -126,7 +234,7 @@
                                 </th>
 
                                 <th>
-                                    Approval
+                                    Status
                                 </th>
 
                                 <th>
@@ -144,7 +252,7 @@
                             {
                                 <tr>
 
-                                    <!-- BOOK -->
+                                    <!-- Book -->
                                     <td>
                                         <strong>
                                             @(review.Book?.Title ?? "Unknown Book")
@@ -152,8 +260,8 @@
                                     </td>
 
 
-                                    <!-- MEMBER -->
-                                    @if (User.IsInRole("Librarian"))
+                                    <!-- Member -->
+                                    @if (isLibrarian)
                                     {
                                         <td>
 
@@ -183,7 +291,7 @@
                                     }
 
 
-                                    <!-- RATING -->
+                                    <!-- Rating -->
                                     <td>
 
                                         <div class="text-warning">
@@ -211,13 +319,13 @@
                                     </td>
 
 
-                                    <!-- COMMENT -->
+                                    <!-- Feedback -->
                                     <td>
 
                                         @if (string.IsNullOrWhiteSpace(review.Comment))
                                         {
                                             <span class="text-muted">
-                                                No comment provided
+                                                No written feedback
                                             </span>
                                         }
                                         else
@@ -228,14 +336,13 @@
                                     </td>
 
 
-                                    <!-- REVIEW DATE -->
+                                    <!-- Review Date -->
                                     <td>
-                                        @(review.ReviewDate.ToLocalTime()
-                                            .ToString("dd/MM/yyyy"))
+                                        @review.ReviewDate.ToLocalTime().ToString("dd/MM/yyyy")
                                     </td>
 
 
-                                    <!-- APPROVAL -->
+                                    <!-- Status -->
                                     <td>
 
                                         @if (review.IsApproved)
@@ -254,19 +361,17 @@
                                     </td>
 
 
-                                    <!-- ACTIONS -->
+                                    <!-- Actions -->
                                     <td>
 
-                                        @if (User.IsInRole("Librarian"))
+                                        @if (isLibrarian)
                                         {
-                                            <!-- APPROVE PENDING REVIEW -->
                                             @if (!review.IsApproved)
                                             {
                                                 <form asp-action="Approve"
                                                       asp-route-id="@review.ReviewId"
                                                       method="post"
-                                                      class="d-inline"
-                                                      onsubmit="return confirm('Are you sure you want to approve this review?');">
+                                                      class="d-inline">
 
                                                     @Html.AntiForgeryToken()
 
@@ -278,8 +383,6 @@
                                                 </form>
                                             }
 
-
-                                            <!-- DELETE REVIEW -->
                                             <form asp-action="Delete"
                                                   asp-route-id="@review.ReviewId"
                                                   method="post"
@@ -295,10 +398,8 @@
 
                                             </form>
                                         }
-                                        else if (review.UserId == User.FindFirst(
-                                            System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                                        else if (review.UserId == currentUserId)
                                         {
-                                            <!-- MEMBER CAN DELETE OWN REVIEW -->
                                             <form asp-action="Delete"
                                                   asp-route-id="@review.ReviewId"
                                                   method="post"
@@ -313,12 +414,6 @@
                                                 </button>
 
                                             </form>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">
-                                                No actions
-                                            </span>
                                         }
 
                                     </td>

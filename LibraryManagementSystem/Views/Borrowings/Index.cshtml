@@ -1,111 +1,435 @@
 ﻿@model IEnumerable<LibraryManagementSystem.Models.Borrowing>
 
 @{
-    ViewData["Title"] = "Borrowings";
+    ViewData["Title"] = User.IsInRole("Member")
+        ? "Borrowing History"
+        : "Borrowing Transactions";
 }
 
-<h1>Borrowings</h1>
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["ErrorMessage"]
-    </div>
-}
+<div class="container mt-4 mb-5">
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
-}
+    <!-- Page Header -->
+    <div class="mb-4">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Book</th>
-            <th>Member</th>
-            <th>Borrow Date</th>
-            <th>Due Date</th>
-            <th>Return Date</th>
-            <th>Status</th>
-            <th>Renewals</th>
-            <th>Fine</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var borrowing in Model)
+        @if (User.IsInRole("Member"))
         {
-            <tr>
-                <td>
-                    @borrowing.Book?.Title
-                </td>
+            <h1>📚 My Borrowing History</h1>
 
-                <td>
-                    @borrowing.User?.FirstName
-                    @borrowing.User?.LastName
-                </td>
-
-                <td>
-                    @borrowing.BorrowDate.ToString("dd/MM/yyyy")
-                </td>
-
-                <td>
-                    @borrowing.DueDate.ToString("dd/MM/yyyy")
-                </td>
-
-                <td>
-                    @(borrowing.ReturnDate.HasValue
-                        ? borrowing.ReturnDate.Value.ToString("dd/MM/yyyy")
-                        : "-")
-                </td>
-
-                <td>
-                    @borrowing.Status
-                </td>
-
-                <td>
-                    @borrowing.RenewalCount
-                </td>
-
-                <td>
-                    @(borrowing.Fine != null
-                        ? borrowing.Fine.Amount.ToString("C")
-                        : "-")
-                </td>
-
-                <td>
-                    @if (borrowing.Status == "Borrowed" &&
-                         borrowing.ReturnDate == null)
-                    {
-                        <a asp-action="Return"
-                           asp-route-id="@borrowing.BorrowingId"
-                           class="btn btn-primary btn-sm">
-                            Return
-                        </a>
-
-                        <form asp-action="Renew"
-                              asp-route-id="@borrowing.BorrowingId"
-                              method="post"
-                              style="display:inline">
-
-                            <button type="submit"
-                                    class="btn btn-success btn-sm">
-                                Renew
-                            </button>
-
-                        </form>
-                    }
-                    else
-                    {
-                        <span class="text-muted">
-                            No actions
-                        </span>
-                    }
-                </td>
-
-            </tr>
+            <p class="text-muted">
+                View your current and previous borrowing records,
+                due dates, returns and fines.
+            </p>
         }
-    </tbody>
-</table>
+        else
+        {
+            <h1>📚 Borrowing Transactions</h1>
+
+            <p class="text-muted">
+                View and manage borrowing transactions
+                for library members.
+            </p>
+        }
+
+    </div>
+
+
+    <!-- Error Message -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <strong>Error:</strong>
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- Success Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
+            <strong>Success:</strong>
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <!-- Total Records -->
+        <div class="col-md-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Total Records
+                    </h6>
+
+                    <h3 class="mb-0">
+                        @Model.Count()
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Currently Borrowed -->
+        <div class="col-md-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Currently Borrowed
+                    </h6>
+
+                    <h3 class="mb-0">
+                        @Model.Count(b => b.Status == "Borrowed")
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Overdue -->
+        <div class="col-md-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Overdue
+                    </h6>
+
+                    <h3 class="mb-0 text-danger">
+                        @Model.Count(b => b.Status == "Overdue")
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Returned -->
+        <div class="col-md-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Returned
+                    </h6>
+
+                    <h3 class="mb-0">
+                        @Model.Count(b => b.Status == "Returned")
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Borrowing Table -->
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+
+            <h5 class="alert-heading">
+                No borrowing history found
+            </h5>
+
+            <p class="mb-0">
+                There are currently no borrowing records.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>Book</th>
+
+                                @if (User.IsInRole("Librarian"))
+                                {
+                                    <th>Member</th>
+                                }
+
+                                <th>Borrow Date</th>
+                                <th>Due Date</th>
+                                <th>Return Date</th>
+                                <th>Status</th>
+                                <th>Renewals</th>
+                                <th>Fine</th>
+                                <th>Fine Status</th>
+                                @if (User.IsInRole("Librarian"))
+                                {
+                                    <th>Actions</th>
+                                }
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var borrowing in Model)
+                            {
+                                <tr>
+
+                                    <!-- Book -->
+                                    <td>
+                                        <strong>
+                                            @borrowing.Book?.Title
+                                        </strong>
+                                    </td>
+
+
+                                    <!-- Member -->
+                                    @if (User.IsInRole("Librarian"))
+                                    {
+                                        <td>
+                                            @borrowing.User?.FirstName
+                                            @borrowing.User?.LastName
+                                        </td>
+                                    }
+
+
+                                    <!-- Borrow Date -->
+                                    <td>
+                                        @(
+                                            borrowing.BorrowDate
+                                                .ToLocalTime()
+                                                .ToString("dd/MM/yyyy")
+                                        )
+                                    </td>
+
+
+                                    <!-- Due Date -->
+                                    <td>
+                                        @(
+                                            borrowing.DueDate
+                                                .ToLocalTime()
+                                                .ToString("dd/MM/yyyy")
+                                        )
+                                    </td>
+
+
+                                    <!-- Return Date -->
+                                    <td>
+                                        @if (borrowing.ReturnDate.HasValue)
+                                        {
+                                            @(
+                                                borrowing.ReturnDate.Value
+                                                    .ToLocalTime()
+                                                    .ToString("dd/MM/yyyy")
+                                            )
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+
+
+                                    <!-- Status -->
+                                    <td>
+
+                                        @if (borrowing.Status == "Borrowed")
+                                        {
+                                            <span class="badge bg-primary">
+                                                Borrowed
+                                            </span>
+                                        }
+                                        else if (borrowing.Status == "Overdue")
+                                        {
+                                            <span class="badge bg-danger">
+                                                Overdue
+                                            </span>
+                                        }
+                                        else if (borrowing.Status == "Returned")
+                                        {
+                                            <span class="badge bg-success">
+                                                Returned
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @borrowing.Status
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Renewals -->
+                                    <td>
+                                        @borrowing.RenewalCount
+                                    </td>
+
+
+                                    <!-- Fine -->
+                                    <td>
+
+                                        @if (borrowing.Status == "Returned")
+                                        {
+                                            @if (borrowing.Fine != null &&
+                                                 borrowing.Fine.Amount > 0)
+                                            {
+                                                <strong>
+                                                    @borrowing.Fine.Amount.ToString("C")
+                                                </strong>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">
+                                                    No fine
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Fine Status -->
+                                    <td>
+
+                                        @if (borrowing.Status != "Returned")
+                                        {
+                                            <span>-</span>
+                                        }
+                                        else if (borrowing.Fine == null)
+                                        {
+                                            <span>-</span>
+                                        }
+                                        else if (borrowing.Fine.Status == "Paid")
+                                        {
+                                            <span class="badge bg-success">
+                                                Paid
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                Unpaid
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Actions -->
+                                    @if (User.IsInRole("Librarian"))
+                                    {
+                                        <td>
+
+                                            @if (borrowing.Status == "Borrowed" &&
+                                                 borrowing.ReturnDate == null)
+                                            {
+                                                <div class="d-flex gap-1">
+
+                                                    <a asp-action="Return"
+                                                       asp-route-id="@borrowing.BorrowingId"
+                                                       class="btn btn-primary btn-sm">
+                                                        Return
+                                                    </a>
+
+                                                    <form asp-action="Renew"
+                                                          asp-route-id="@borrowing.BorrowingId"
+                                                          method="post"
+                                                          class="d-inline">
+
+                                                        @Html.AntiForgeryToken()
+
+                                                        <button type="submit"
+                                                                class="btn btn-success btn-sm">
+                                                            Renew
+                                                        </button>
+
+                                                    </form>
+
+                                                </div>
+                                            }
+                                            else if (borrowing.Status == "Overdue" &&
+                                                     borrowing.ReturnDate == null)
+                                            {
+                                                <a asp-action="Return"
+                                                   asp-route-id="@borrowing.BorrowingId"
+                                                   class="btn btn-primary btn-sm">
+                                                    Return
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">
+                                                    No actions
+                                                </span>
+                                            }
+
+                                        </td>
+                                    }
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>

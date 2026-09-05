@@ -19,6 +19,7 @@ namespace LibraryManagementSystem.Controllers
             _context = context;
         }
 
+
         // =========================================================
         // GET: /Borrowings
         // Display borrowing records
@@ -41,11 +42,31 @@ namespace LibraryManagementSystem.Controllers
                 query = query.Where(b => b.UserId == userId);
             }
 
-            // Librarians can see all borrowing records.
-
             var borrowings = await query
                 .OrderByDescending(b => b.BorrowDate)
                 .ToListAsync();
+
+            // Automatically calculate the displayed status.
+            var today = DateTime.UtcNow.Date;
+
+            foreach (var borrowing in borrowings)
+            {
+                // Returned always remains Returned.
+                if (borrowing.ReturnDate.HasValue)
+                {
+                    borrowing.Status = "Returned";
+                }
+                // Active borrowing past its due date becomes Overdue.
+                else if (borrowing.DueDate.Date < today)
+                {
+                    borrowing.Status = "Overdue";
+                }
+                // Active borrowing that is not overdue remains Borrowed.
+                else
+                {
+                    borrowing.Status = "Borrowed";
+                }
+            }
 
             return View(borrowings);
         }
@@ -90,13 +111,11 @@ namespace LibraryManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Borrow(BorrowBookViewModel model)
+        public async Task<IActionResult> Borrow(
+            BorrowBookViewModel model)
         {
-            // -----------------------------------------------------
-            // 1. Get the currently logged-in user's Identity ID
-            // -----------------------------------------------------
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -104,23 +123,18 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 2. Find the current user in the database
-            // -----------------------------------------------------
-
+            // Find current user
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
-                return NotFound("User account could not be found.");
+                return NotFound(
+                    "User account could not be found.");
             }
 
 
-            // -----------------------------------------------------
-            // 3. Check whether the account is active
-            // -----------------------------------------------------
-
+            // Check account status
             if (!user.IsActive)
             {
                 ModelState.AddModelError(
@@ -133,10 +147,7 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 4. Validate the selected BookId
-            // -----------------------------------------------------
-
+            // Validate model
             if (!ModelState.IsValid)
             {
                 await LoadAvailableBooksAsync(model);
@@ -145,12 +156,10 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 5. Find the selected book
-            // -----------------------------------------------------
-
+            // Find book
             var book = await _context.Books
-                .FirstOrDefaultAsync(b => b.BookId == model.BookId);
+                .FirstOrDefaultAsync(
+                    b => b.BookId == model.BookId);
 
             if (book == null)
             {
@@ -164,14 +173,7 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 6. Check whether the book is still available
-            // -----------------------------------------------------
-            // This check happens again during POST because another
-            // user could have borrowed the book after the GET page
-            // was displayed.
-            // -----------------------------------------------------
-
+            // Check availability
             if (book.AvailabilityStatus != "Available")
             {
                 ModelState.AddModelError(
@@ -184,13 +186,7 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 7. Find the library
-            // -----------------------------------------------------
-            // For the current system we have one configured library.
-            // We use its borrowing settings to calculate the loan.
-            // -----------------------------------------------------
-
+            // Find library
             var library = await _context.Libraries
                 .Include(l => l.BorrowingSettings)
                 .AsNoTracking()
@@ -208,10 +204,6 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 8. Make sure borrowing settings exist
-            // -----------------------------------------------------
-
             var settings = library.BorrowingSettings;
 
             if (settings == null)
@@ -226,27 +218,23 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 9. Count the user's active borrowings
-            // -----------------------------------------------------
-
-            var activeBorrowingCount = await _context.Borrowings
-                .CountAsync(b =>
-                    b.UserId == userId &&
-                    b.ReturnDate == null &&
-                    b.Status != "Returned");
+            // Count active borrowings
+            var activeBorrowingCount =
+                await _context.Borrowings.CountAsync(
+                    b =>
+                        b.UserId == userId &&
+                        b.ReturnDate == null &&
+                        b.Status != "Returned");
 
 
-            // -----------------------------------------------------
-            // 10. Check maximum borrowing limit
-            // -----------------------------------------------------
-
-            if (activeBorrowingCount >= settings.MaximumBorrowableItems)
+            // Maximum borrowing limit
+            if (activeBorrowingCount >=
+                settings.MaximumBorrowableItems)
             {
                 ModelState.AddModelError(
                     "",
-                    $"You have reached the maximum borrowing limit " +
-                    $"of {settings.MaximumBorrowableItems} books.");
+                    $"You have reached the maximum borrowing " +
+                    $"limit of {settings.MaximumBorrowableItems} books.");
 
                 await LoadAvailableBooksAsync(model);
 
@@ -254,20 +242,14 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 11. Calculate borrowing dates
-            // -----------------------------------------------------
-
+            // Calculate dates
             var borrowDate = DateTime.UtcNow;
 
             var dueDate = borrowDate.AddDays(
                 settings.LoanDurationDays);
 
 
-            // -----------------------------------------------------
-            // 12. Create the Borrowing entity
-            // -----------------------------------------------------
-
+            // Create borrowing
             var borrowing = new Borrowing
             {
                 UserId = userId,
@@ -279,31 +261,15 @@ namespace LibraryManagementSystem.Controllers
                 RenewalCount = 0
             };
 
-
-            // -----------------------------------------------------
-            // 13. Add borrowing to database
-            // -----------------------------------------------------
-
             _context.Borrowings.Add(borrowing);
 
 
-            // -----------------------------------------------------
-            // 14. Change book availability
-            // -----------------------------------------------------
-
+            // Update book availability
             book.AvailabilityStatus = "Borrowed";
 
 
-            // -----------------------------------------------------
-            // 15. Save everything
-            // -----------------------------------------------------
-
             await _context.SaveChangesAsync();
 
-
-            // -----------------------------------------------------
-            // 16. Return to borrowing list
-            // -----------------------------------------------------
 
             TempData["SuccessMessage"] =
                 $"'{book.Title}' was borrowed successfully. " +
@@ -311,6 +277,7 @@ namespace LibraryManagementSystem.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // =========================================================
         // GET: /Borrowings/Return/1
@@ -338,7 +305,7 @@ namespace LibraryManagementSystem.Controllers
                 return NotFound();
             }
 
-            // A returned borrowing cannot be returned again.
+            // Already returned?
             if (borrowing.ReturnDate != null ||
                 borrowing.Status == "Returned")
             {
@@ -348,6 +315,8 @@ namespace LibraryManagementSystem.Controllers
 
             return View(borrowing);
         }
+
+
         // =========================================================
         // POST: /Borrowings/Return/1
         // Process the book return
@@ -358,10 +327,6 @@ namespace LibraryManagementSystem.Controllers
         [Authorize(Roles = "Member,Librarian")]
         public async Task<IActionResult> Return(int id)
         {
-            // -----------------------------------------------------
-            // 1. Find the borrowing
-            // -----------------------------------------------------
-
             var borrowing = await _context.Borrowings
                 .Include(b => b.Book)
                 .Include(b => b.User)
@@ -374,10 +339,7 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 2. Make sure it has not already been returned
-            // -----------------------------------------------------
-
+            // Already returned?
             if (borrowing.ReturnDate != null ||
                 borrowing.Status == "Returned")
             {
@@ -386,10 +348,7 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 3. Find the library borrowing settings
-            // -----------------------------------------------------
-
+            // Find library settings
             var library = await _context.Libraries
                 .Include(l => l.BorrowingSettings)
                 .AsNoTracking()
@@ -410,33 +369,25 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 4. Set the return date
-            // -----------------------------------------------------
-
+            // Set return date
             var returnDate = DateTime.UtcNow;
 
             borrowing.ReturnDate = returnDate;
             borrowing.Status = "Returned";
 
 
-            // -----------------------------------------------------
-            // 5. Calculate overdue days
-            // -----------------------------------------------------
-
+            // Calculate overdue days
             var overdueDays = 0;
 
-            if (returnDate > borrowing.DueDate)
+            if (returnDate.Date > borrowing.DueDate.Date)
             {
                 overdueDays =
-                    (returnDate.Date - borrowing.DueDate.Date).Days;
+                    (returnDate.Date -
+                     borrowing.DueDate.Date).Days;
             }
 
 
-            // -----------------------------------------------------
-            // 6. Create a fine if the book is overdue
-            // -----------------------------------------------------
-
+            // Create fine if returned late
             if (overdueDays > 0)
             {
                 var fineAmount =
@@ -446,36 +397,29 @@ namespace LibraryManagementSystem.Controllers
                 {
                     BorrowingId = borrowing.BorrowingId,
                     Amount = fineAmount,
-                    Reason = $"Book returned {overdueDays} day(s) late.",
+                    Reason =
+                        $"Book returned {overdueDays} day(s) late.",
                     IssuedDate = returnDate,
-                    Status = "Unpaid"
+                    Status = "Unpaid",
+                    PaidDate = null
                 };
 
                 _context.Fines.Add(fine);
             }
 
 
-            // -----------------------------------------------------
-            // 7. Make the book available again
-            // -----------------------------------------------------
-
+            // Make book available again
             if (borrowing.Book != null)
             {
-                borrowing.Book.AvailabilityStatus = "Available";
+                borrowing.Book.AvailabilityStatus =
+                    "Available";
             }
 
-
-            // -----------------------------------------------------
-            // 8. Save all changes
-            // -----------------------------------------------------
 
             await _context.SaveChangesAsync();
 
 
-            // -----------------------------------------------------
-            // 9. Display success message
-            // -----------------------------------------------------
-
+            // Success message
             if (overdueDays > 0)
             {
                 var fineAmount =
@@ -496,6 +440,7 @@ namespace LibraryManagementSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
         // =========================================================
         // POST: /Borrowings/Renew/2
         // Renew a borrowed book
@@ -506,10 +451,6 @@ namespace LibraryManagementSystem.Controllers
         [Authorize(Roles = "Member,Librarian")]
         public async Task<IActionResult> Renew(int id)
         {
-            // -----------------------------------------------------
-            // 1. Get the logged-in user's ID
-            // -----------------------------------------------------
-
             var userId = User.FindFirstValue(
                 ClaimTypes.NameIdentifier);
 
@@ -519,10 +460,7 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 2. Find the borrowing
-            // -----------------------------------------------------
-
+            // Find borrowing
             var borrowing = await _context.Borrowings
                 .Include(b => b.Book)
                 .FirstOrDefaultAsync(
@@ -534,11 +472,8 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 3. Members can only renew their own borrowing.
+            // Members can only renew their own borrowing.
             // Librarians can renew any borrowing.
-            // -----------------------------------------------------
-
             if (!User.IsInRole("Librarian") &&
                 borrowing.UserId != userId)
             {
@@ -546,24 +481,20 @@ namespace LibraryManagementSystem.Controllers
             }
 
 
-            // -----------------------------------------------------
-            // 4. Make sure the book is currently borrowed
-            // -----------------------------------------------------
-
+            // Do not allow overdue or returned books to renew.
             if (borrowing.Status != "Borrowed" ||
-                borrowing.ReturnDate != null)
+                borrowing.ReturnDate != null ||
+                borrowing.DueDate.Date < DateTime.UtcNow.Date)
             {
                 TempData["ErrorMessage"] =
-                    "This borrowing cannot be renewed.";
+                    "This borrowing cannot be renewed because " +
+                    "it is overdue or has already been returned.";
 
                 return RedirectToAction(nameof(Index));
             }
 
 
-            // -----------------------------------------------------
-            // 5. Get borrowing settings
-            // -----------------------------------------------------
-
+            // Get borrowing settings
             var library = await _context.Libraries
                 .Include(l => l.BorrowingSettings)
                 .AsNoTracking()
@@ -579,24 +510,19 @@ namespace LibraryManagementSystem.Controllers
             var settings = library.BorrowingSettings;
 
 
-            // -----------------------------------------------------
-            // 6. Check renewal limit
-            // -----------------------------------------------------
-
+            // Check renewal limit
             if (borrowing.RenewalCount >=
                 settings.RenewalLimit)
             {
                 TempData["ErrorMessage"] =
-                    "The renewal limit for this borrowing has been reached.";
+                    "The renewal limit for this borrowing " +
+                    "has been reached.";
 
                 return RedirectToAction(nameof(Index));
             }
 
 
-            // -----------------------------------------------------
-            // 7. Extend the due date
-            // -----------------------------------------------------
-
+            // Extend due date
             borrowing.DueDate =
                 borrowing.DueDate.AddDays(
                     settings.LoanDurationDays);
@@ -604,23 +530,17 @@ namespace LibraryManagementSystem.Controllers
             borrowing.RenewalCount++;
 
 
-            // -----------------------------------------------------
-            // 8. Save changes
-            // -----------------------------------------------------
-
             await _context.SaveChangesAsync();
 
 
-            // -----------------------------------------------------
-            // 9. Success message
-            // -----------------------------------------------------
-
             TempData["SuccessMessage"] =
                 $"Book renewed successfully. " +
-                $"New due date: {borrowing.DueDate:dd/MM/yyyy}.";
+                $"New due date: " +
+                $"{borrowing.DueDate:dd/MM/yyyy}.";
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // =========================================================
         // Helper: Load available books
@@ -631,7 +551,8 @@ namespace LibraryManagementSystem.Controllers
         {
             var books = await _context.Books
                 .AsNoTracking()
-                .Where(b => b.AvailabilityStatus == "Available")
+                .Where(b =>
+                    b.AvailabilityStatus == "Available")
                 .OrderBy(b => b.Title)
                 .Select(b => new
                 {

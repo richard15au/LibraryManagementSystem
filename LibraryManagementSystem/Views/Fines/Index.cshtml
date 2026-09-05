@@ -4,29 +4,32 @@
     ViewData["Title"] = "Fine Management";
 }
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
 
-    <!-- PAGE HEADER -->
-
+    <!-- Header -->
     <div class="mb-4">
-        <h1>Fine Management</h1>
 
         @if (User.IsInRole("Librarian"))
         {
+            <h1>💰 Fine Management</h1>
+
             <p class="text-muted">
                 View and manage fines for library members.
             </p>
         }
         else
         {
+            <h1>💰 My Fines</h1>
+
             <p class="text-muted">
-                View your borrowing fines and payment status.
+                View your fines and payment status.
             </p>
         }
+
     </div>
 
 
-    <!-- SUCCESS MESSAGE -->
+    <!-- Success Message -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show"
@@ -44,13 +47,13 @@
     }
 
 
-    <!-- ERROR MESSAGE -->
+    <!-- Error Message -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show"
              role="alert">
 
-            <strong>Unable to complete request.</strong>
+            <strong>Error:</strong>
             @TempData["ErrorMessage"]
 
             <button type="button"
@@ -62,8 +65,76 @@
     }
 
 
-    <!-- NO FINES -->
-    @if (Model == null || !Model.Any())
+    <!-- Summary -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Total Fines
+                    </h6>
+
+                    <h3 class="mb-0">
+                        @Model.Count()
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Outstanding
+                    </h6>
+
+                    <h3 class="mb-0">
+                        @Model.Count(f => f.Status != "Paid")
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Paid
+                    </h6>
+
+                    <h3 class="mb-0">
+                        @Model.Count(f => f.Status == "Paid")
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- No Fines -->
+    @if (!Model.Any())
     {
         <div class="alert alert-info">
 
@@ -71,24 +142,15 @@
                 No fines found
             </h5>
 
-            @if (User.IsInRole("Librarian"))
-            {
-                <p class="mb-0">
-                    There are currently no fines in the system.
-                </p>
-            }
-            else
-            {
-                <p class="mb-0">
-                    You currently have no fines.
-                </p>
-            }
+            <p class="mb-0">
+                There are currently no fines to display.
+            </p>
 
         </div>
     }
     else
     {
-        <!-- FINE TABLE -->
+        <!-- Fine Table -->
 
         <div class="card shadow-sm">
 
@@ -113,15 +175,12 @@
                                 <th>Issued Date</th>
                                 <th>Paid Date</th>
                                 <th>Status</th>
-
-                                @if (User.IsInRole("Librarian"))
-                                {
-                                    <th>Actions</th>
-                                }
+                                <th>Actions</th>
 
                             </tr>
 
                         </thead>
+
 
                         <tbody>
 
@@ -129,49 +188,27 @@
                             {
                                 <tr>
 
-                                    <!-- MEMBER -->
+                                    <!-- Member -->
                                     @if (User.IsInRole("Librarian"))
                                     {
                                         <td>
-
-                                            @if (fine.Borrowing?.User != null)
-                                            {
-                                                var memberName =
-                                                    $"{fine.Borrowing.User.FirstName} {fine.Borrowing.User.LastName}"
-                                                    .Trim();
-
-                                                if (!string.IsNullOrWhiteSpace(memberName))
-                                                {
-                                                    @memberName
-                                                }
-                                                else
-                                                {
-                                                    @fine.Borrowing.User.Email
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">
-                                                    Unknown Member
-                                                </span>
-                                            }
-
+                                            <strong>
+                                                @fine.Borrowing?.User?.FirstName
+                                                @fine.Borrowing?.User?.LastName
+                                            </strong>
                                         </td>
                                     }
 
 
-                                    <!-- BOOK -->
-
+                                    <!-- Book -->
                                     <td>
                                         <strong>
-                                            @(fine.Borrowing?.Book?.Title
-                                                ?? "Unknown Book")
+                                            @fine.Borrowing?.Book?.Title
                                         </strong>
                                     </td>
 
 
-                                    <!-- AMOUNT -->
-
+                                    <!-- Amount -->
                                     <td>
                                         <strong>
                                             @fine.Amount.ToString("C")
@@ -179,29 +216,27 @@
                                     </td>
 
 
-                                    <!-- REASON -->
-
+                                    <!-- Reason -->
                                     <td>
-                                        @(string.IsNullOrWhiteSpace(fine.Reason)
-                                            ? "No reason specified"
-                                            : fine.Reason)
+                                        @fine.Reason
                                     </td>
 
 
-                                    <!-- ISSUED DATE -->
-
+                                    <!-- Issued Date -->
                                     <td>
-                                        @(fine.IssuedDate.ToLocalTime().ToString("dd/MM/yyyy"))
+                                        @(fine.IssuedDate
+                                            .ToLocalTime()
+                                            .ToString("dd/MM/yyyy"))
                                     </td>
 
 
-                                    <!-- PAID DATE -->
-
+                                    <!-- Paid Date -->
                                     <td>
-
                                         @if (fine.PaidDate.HasValue)
                                         {
-                                            @(fine.PaidDate.Value.ToLocalTime().ToString("dd/MM/yyyy"))
+                                            @(fine.PaidDate.Value
+                                                .ToLocalTime()
+                                                .ToString("dd/MM/yyyy"))
                                         }
                                         else
                                         {
@@ -209,12 +244,10 @@
                                                 Not paid
                                             </span>
                                         }
-
                                     </td>
 
 
-                                    <!-- STATUS -->
-
+                                    <!-- Status -->
                                     <td>
 
                                         @if (fine.Status == "Paid")
@@ -233,18 +266,18 @@
                                     </td>
 
 
-                                    <!-- ACTIONS -->
-                                    @if (User.IsInRole("Librarian"))
-                                    {
-                                        <td>
+                                    <!-- Actions -->
+                                    <td>
 
+                                        @if (User.IsInRole("Librarian"))
+                                        {
                                             @if (fine.Status != "Paid")
                                             {
                                                 <form asp-action="MarkAsPaid"
                                                       asp-route-id="@fine.FineId"
                                                       method="post"
                                                       class="d-inline"
-                                                      onsubmit="return confirm('Are you sure you want to mark this fine as paid?');">
+                                                      onsubmit="return confirm('Mark this fine as paid?');">
 
                                                     @Html.AntiForgeryToken()
 
@@ -261,9 +294,24 @@
                                                     Completed
                                                 </span>
                                             }
+                                        }
+                                        else
+                                        {
+                                            @if (fine.Status == "Paid")
+                                            {
+                                                <span class="text-success">
+                                                    Paid
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-danger">
+                                                    Payment due
+                                                </span>
+                                            }
+                                        }
 
-                                        </td>
-                                    }
+                                    </td>
 
                                 </tr>
                             }
